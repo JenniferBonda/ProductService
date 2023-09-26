@@ -1,7 +1,9 @@
+#Jennifer Bonda
+
 from flask import Flask, jsonify, request
 app = Flask(__name__)
 
-# Sample data
+
 products = [
     {"id": 1, "name": "sponge", "price": 3, "quantity": 15},
     {"id": 2, "name": "shirt", "price": 15, "quantity": 30},
@@ -39,5 +41,34 @@ def create_product():
     products.append(new_product)
     return jsonify({"message": "Product created", "product": new_product}), 201
 
+@app.route('/products/quantity/<int:product_id>/<int:quantity1>', methods=["PUT"])
+def reduce_stock(product_id, quantity1):
+
+    product = next((p for p in products if p['id'] == product_id), None)
+
+    if product:
+        if product['quantity'] >= quantity1:
+            product['quantity'] -= quantity1
+            return jsonify({"message": f"Stock quantity reduced by {quantity1} for product {product_id}"})
+        else:
+            return jsonify({"error": "Not enough stock of that product"}), 400
+        
+
+@app.route('/products/addbackquantity/<int:product_id>/<int:quantity1>', methods=["PUT"])
+def add_stock(product_id, quantity1):
+
+    product = next((p for p in products if p['id'] == product_id), None)
+
+    if product:
+        product['quantity'] += quantity1
+        return jsonify({"message": f"Stock quantity increased by {quantity1} for product {product_id}"})     
+
+@app.route('/products/nameandprice/<int:product_id>', methods=['GET'])
+def get_product_name_price(product_id):
+    product = next((p for p in products if p["id"] == product_id), None)
+    if product:
+        return jsonify({"name": product["name"], "price": product["price"]})
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5000)
